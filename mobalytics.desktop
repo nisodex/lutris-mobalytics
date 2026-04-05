@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=mobalytics
+Exec=##GAMEDIR##/mimehelper.sh "Mobalytics Desk" "%u"
+StartupNotify=false
+MimeType=x-scheme-handler/mobalytics;
+X-KDE-Protocols=mobalytics
+NoDisplay=true

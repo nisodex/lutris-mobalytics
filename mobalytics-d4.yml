@@ -1,0 +1,105 @@
+##
+## Lutris installer for Mobalytics Desktop — Diablo IV version
+## Installs the Mobalytics companion app and configures it to find your Diablo IV installation.
+##
+## Notes:
+##   - The overlay does NOT work on Linux. Use the "2nd Screen" (2nd monitor) feature instead.
+##   - Requires Diablo IV already installed via Lutris (Battle.net prefix).
+##   - Requires: zenity (fallback folder picker), wine64
+##
+## Based on the mobalytics-standard installer by tridoxx and helper scripts by aleasto.
+##
+
+name: Mobalytics Desktop — Diablo IV (Wine)
+game_slug: mobalytics
+version: diablo-iv
+runner: wine
+slug: mobalytics-diablo-iv
+description: >-
+  Installs the Mobalytics desktop companion app configured for Diablo IV.
+  The in-game overlay does NOT work on Linux — use the second-screen / second-monitor
+  feature instead. Diablo IV must already be installed via Lutris (Battle.net).
+notes: >-
+  Auto-detection of your Diablo IV installation is attempted automatically.
+  If it fails, a folder picker (zenity) will appear. Point it at the Wine prefix
+  that contains your Battle.net / Diablo IV installation.
+
+script:
+  require-binaries: zenity
+
+  wine:
+    dxvk: false
+
+  files:
+    # Official Mobalytics Windows installer (same binary for all games)
+    - installer: https://cdn.mobalytics.gg/apps/latest/league/win/Mobalytics-Desktop-Win-stable.exe
+    # Upstream helper scripts (shared with the LoL installer)
+    - mimehelper: https://gist.githubusercontent.com/aleasto/078272b34eefb01fdeb440a79d620290/raw/1a8cfe96962611b3fdc3e08eb6d09030d57d3d00/mimehelper.sh
+    - url-protocol-desktop: https://gist.githubusercontent.com/aleasto/000699163f1a1bd3093b45bf4087ee2b/raw/75616f235d76d5787fed442665d95d39469841d9/mobalytics.desktop
+    # D4-specific helper — replace URL with your own GitHub raw URL once the repo is public
+    - find-d4: https://raw.githubusercontent.com/nisodex/lutris-mobalytics/main/find-d4.sh
+
+  game:
+    arch: win64
+    exe: $GAMEDIR/drive_c/users/$USER/Desktop/Mobalytics Desktop.lnk
+    prefix: $GAMEDIR
+
+  installer:
+    # ── Step 1: Run the Mobalytics installer ──────────────────────────────────
+    - task:
+        name: wineexec
+        arch: win64
+        prefix: $GAMEDIR
+        executable: $installer
+        description: Running Mobalytics installer
+        exclude_processes: "Update.exe 'Mobalytics Desktop.exe' installer.exe"
+
+    # ── Step 2: Clean up leftover Wine processes ───────────────────────────────
+    - task:
+        name: winekill
+        prefix: $GAMEDIR
+
+    # ── Step 3: DLL overrides (mscoree — required for .NET login flow) ─────────
+    - task:
+        name: set_regedit
+        prefix: $GAMEDIR
+        description: Configuring DLL Overrides (global)
+        path: HKEY_CURRENT_USER\Software\Wine\DllOverrides
+        key: mscoree
+        value: native
+
+    - task:
+        name: set_regedit
+        prefix: $GAMEDIR
+        description: Configuring DLL Overrides (per-app)
+        path: HKEY_CURRENT_USER\Software\Wine\AppDefaults\Mobalytics Desktop.exe\DllOverrides
+        key: mscoree
+        value: native
+
+    # ── Step 4: Copy helper scripts into the game dir ─────────────────────────
+    - chmodx: mimehelper
+    - chmodx: find-d4
+
+    - copy:
+        src: mimehelper
+        dst: $GAMEDIR
+
+    - copy:
+        src: url-protocol-desktop
+        dst: $GAMEDIR
+
+    # ── Step 5: Register mobalytics:// URL scheme (needed for login) ──────────
+    - execute:
+        description: Set up mobalytics:// URL scheme used for authentication
+        command: >-
+          sed -i 's|##GAMEDIR##|$GAMEDIR|g' $GAMEDIR/mobalytics.desktop;
+          desktop-file-install --dir ~/.local/share/applications $GAMEDIR/mobalytics.desktop
+
+    # ── Step 6: Locate Diablo IV installation and write settings ─────────────
+    - execute:
+        description: Locating the Diablo IV installation
+        disable_runtime: true
+        env:
+          GAMEDIR: $GAMEDIR
+          WINEBIN: $WINEBIN
+        file: find-d4
