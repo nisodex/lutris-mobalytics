@@ -99,9 +99,9 @@ script:
           WINEBIN: $WINEBIN
         file: find-d4
 
-    # ── Step 7: Create a predictable launcher ────────────────────────────────
     - write_file:
         file: $GAMEDIR/launch.bat
         content: |
           @echo off
-          start "" "%LocalAppData%\Programs\mobalytics-desktop\Mobalytics Desktop.exe"
+          cd "%LocalAppData%\Programs\mobalytics-desktop"
+          "Mobalytics Desktop.exe"
