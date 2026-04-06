@@ -41,7 +41,7 @@ script:
 
   game:
     arch: win64
-    exe: launch.bat
+    exe: Mobalytics.exe
     prefix: $GAMEDIR
 
   installer:
@@ -99,8 +99,8 @@ script:
           WINEBIN: $WINEBIN
         file: find-d4
 
-    - write_file:
-        file: $GAMEDIR/launch.bat
-        content: |
-          @echo off
-          "%LocalAppData%\Programs\mobalytics-desktop\Mobalytics Desktop.exe"
+    # ── Step 7: Create a predictable launcher ────────────────────────────────
+    - execute:
+        description: Linking the executable to a predictable location
+        command: >-
+          find "$GAMEDIR" -type f -iname "Mobalytics Desktop.exe" -exec ln -sf {} "$GAMEDIR/Mobalytics.exe" \;
