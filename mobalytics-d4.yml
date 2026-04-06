@@ -41,7 +41,7 @@ script:
 
   game:
     arch: win64
-    exe: $GAMEDIR/drive_c/users/$USER/Desktop/Mobalytics Desktop.lnk
+    exe: Mobalytics.lnk
     prefix: $GAMEDIR
 
   installer:
@@ -52,12 +52,6 @@ script:
         prefix: $GAMEDIR
         executable: $installer
         description: Running Mobalytics installer
-        exclude_processes: "Update.exe 'Mobalytics Desktop.exe' installer.exe"
-
-    # ── Step 2: Clean up leftover Wine processes ───────────────────────────────
-    - task:
-        name: winekill
-        prefix: $GAMEDIR
 
     # ── Step 3: DLL overrides (mscoree — required for .NET login flow) ─────────
     - task:
@@ -103,3 +97,9 @@ script:
           GAMEDIR: $GAMEDIR
           WINEBIN: $WINEBIN
         file: find-d4
+
+    # ── Step 7: Create a predictable shortcut ────────────────────────────────
+    - execute:
+        description: Fixing shortcut for umu-run steamuser
+        command: >-
+          find "$GAMEDIR" -iname "Mobalytics Desktop.lnk" -exec ln -sf {} "$GAMEDIR/Mobalytics.lnk" \;
