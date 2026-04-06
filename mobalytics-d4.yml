@@ -103,5 +103,4 @@ script:
         file: $GAMEDIR/launch.bat
         content: |
           @echo off
-          cd "%LocalAppData%\Programs\mobalytics-desktop"
-          "Mobalytics Desktop.exe"
+          "%LocalAppData%\Programs\mobalytics-desktop\Mobalytics Desktop.exe"
