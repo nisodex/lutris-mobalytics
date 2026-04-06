@@ -23,9 +23,9 @@ script:
 
   files:
     - installer: https://cdn.mobalytics.gg/apps/latest/league/win/Mobalytics-Desktop-Win-stable.exe
-    - mimehelper: file:///home/nuri/Proyectos/lutris-mobalytics/mimehelper.sh
-    - url-protocol-desktop: file:///home/nuri/Proyectos/lutris-mobalytics/mobalytics.desktop
-    - find-d4: file:///home/nuri/Proyectos/lutris-mobalytics/find-d4.sh
+    - mimehelper: https://gist.githubusercontent.com/aleasto/078272b34eefb01fdeb440a79d620290/raw/1a8cfe96962611b3fdc3e08eb6d09030d57d3d00/mimehelper.sh
+    - url-protocol-desktop: https://gist.githubusercontent.com/aleasto/000699163f1a1bd3093b45bf4087ee2b/raw/75616f235d76d5787fed442665d95d39469841d9/mobalytics.desktop
+    - find-d4: https://raw.githubusercontent.com/nisodex/lutris-mobalytics/main/find-d4.sh
 
   game:
     arch: win64
@@ -40,6 +40,15 @@ script:
         prefix: $GAMEDIR
         executable: $installer
         description: Running Mobalytics installer
+
+    # ── Step 1.5: Wait for background extraction ──────────────────────────────
+    - execute:
+        description: Waiting for installer to finish extracting files...
+        command: >-
+          while [ -z "$(find "$GAMEDIR" -type f -iname "Mobalytics Desktop.exe" 2>/dev/null)" ]; do
+            sleep 2;
+          done;
+          sleep 10
 
     # ── Step 3: DLL overrides (mscoree — required for .NET login flow) ─────────
     - task:

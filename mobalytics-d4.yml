@@ -53,6 +53,15 @@ script:
         executable: $installer
         description: Running Mobalytics installer
 
+    # ── Step 1.5: Wait for background extraction ──────────────────────────────
+    - execute:
+        description: Waiting for installer to finish extracting files...
+        command: >-
+          while [ -z "$(find "$GAMEDIR" -type f -iname "Mobalytics Desktop.exe" 2>/dev/null)" ]; do
+            sleep 2;
+          done;
+          sleep 10
+
     # ── Step 3: DLL overrides (mscoree — required for .NET login flow) ─────────
     - task:
         name: set_regedit
