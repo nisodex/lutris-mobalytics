@@ -52,7 +52,6 @@ script:
         prefix: $GAMEDIR
         executable: $installer
         description: Running Mobalytics installer
-        exclude_processes: "Update.exe 'Mobalytics Desktop.exe' installer.exe"
 
     # ── Step 3: DLL overrides (mscoree — required for .NET login flow) ─────────
     - task:
