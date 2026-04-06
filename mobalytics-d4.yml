@@ -41,7 +41,7 @@ script:
 
   game:
     arch: win64
-    exe: Mobalytics.lnk
+    exe: launch.bat
     prefix: $GAMEDIR
 
   installer:
@@ -52,6 +52,7 @@ script:
         prefix: $GAMEDIR
         executable: $installer
         description: Running Mobalytics installer
+        exclude_processes: "Update.exe 'Mobalytics Desktop.exe' installer.exe"
 
     # ── Step 3: DLL overrides (mscoree — required for .NET login flow) ─────────
     - task:
@@ -98,8 +99,9 @@ script:
           WINEBIN: $WINEBIN
         file: find-d4
 
-    # ── Step 7: Create a predictable shortcut ────────────────────────────────
-    - execute:
-        description: Fixing shortcut for umu-run steamuser
-        command: >-
-          find "$GAMEDIR" -iname "Mobalytics Desktop.lnk" -exec ln -sf {} "$GAMEDIR/Mobalytics.lnk" \;
+    # ── Step 7: Create a predictable launcher ────────────────────────────────
+    - write_file:
+        file: $GAMEDIR/launch.bat
+        content: |
+          @echo off
+          start "" "%LocalAppData%\Programs\mobalytics-desktop\Mobalytics Desktop.exe"
